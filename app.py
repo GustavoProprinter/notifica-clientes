@@ -1,4 +1,8 @@
+import os
+import smtplib
 from flask import Flask, render_template, request
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
@@ -22,9 +26,27 @@ def avisar():
     if not email_cliente:
         return f"Cliente {nome_cliente} não encontrado.", 400
 
-    # Aqui você colocaria a lógica para enviar o email, por exemplo.
-    # Por enquanto só vai retornar uma mensagem simples.
+    # Conteúdo do e-mail
+    assunto = "Técnico a caminho"
+    corpo = f"Olá {nome_cliente}, o técnico da ProPrinter está a caminho para atendimento do seu chamado."
+
+    # Monta o e-mail
+    msg = MIMEMultipart()
+    msg["From"] = os.environ.get("EMAIL_USER")
+    msg["To"] = email_cliente
+    msg["Subject"] = assunto
+    msg.attach(MIMEText(corpo, "plain"))
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as servidor:
+            servidor.starttls()
+            servidor.login(os.environ.get("EMAIL_USER"), os.environ.get("EMAIL_PASS"))
+            servidor.sendmail(msg["From"], msg["To"], msg.as_string())
+    except Exception as e:
+        return f"Erro ao enviar e-mail: {e}", 500
+
     return f"Notificação enviada para {nome_cliente} no email {email_cliente}!"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
