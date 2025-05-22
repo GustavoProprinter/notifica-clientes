@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: notifica-cliente
+    env: python
+    buildCommand: ""
+    startCommand: "python app.py"
+    envVars:
+      - key: EMAIL_USER
+        value: impressoras@proprinter.com.br
+      - key: EMAIL_PASS
+        value: ttze hhnx vrep opvu
+

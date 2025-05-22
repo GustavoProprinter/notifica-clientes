@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Notificar Cliente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding-top: 50px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+        input, select, button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 250px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Chamado #1234</h2>
+        <p>Selecione o cliente para notificar:</p>
+
+        <!-- Campo de busca -->
+        <input type="text" id="filtro" placeholder="Buscar por nome..." onkeyup="filtrarClientes()">
+
+        <form action="/avisar" method="post">
+            <select name="nome_cliente" id="clienteSelect" required>
+                <option value="" disabled selected>Selecione um cliente</option>
+                <option value="Gustavo">Gustavo</option>
+                <option value="Suporte">Suporte</option>
+                <option value="Impressora">Impressora</option>
+            </select><br>
+            <button type="submit">Técnico a caminho</button>
+        </form>
+    </div>
+
+    <!-- JavaScript embutido -->
+    <script>
+        function filtrarClientes() {
+            const input = document.getElementById("filtro");
+            const filtro = input.value.toLowerCase();
+            const select = document.getElementById("clienteSelect");
+            const options = select.getElementsByTagName("option");
+
+            for (let i = 0; i < options.length; i++) {
+                const txt = options[i].textContent || options[i].innerText;
+                if (i === 0) continue; // pula o "Selecione um cliente"
+                if (txt.toLowerCase().includes(filtro)) {
+                    options[i].style.display = "";
+                } else {
+                    options[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
