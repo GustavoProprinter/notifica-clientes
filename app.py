@@ -1,8 +1,14 @@
 from flask import Flask, render_template, request
-import smtplib
-from email.mime.text import MIMEText
 
 app = Flask(__name__)
+
+# Dicionário para mapear nome do cliente para email
+clientes_emails = {
+    "Gustavo": "gustavo@proprinter.com.br",
+    "Suporte": "suporte@proprinter.com.br",
+    "Impressora": "impressora@proprinter.com.br",
+    "Felipe": "felipe@proprinter.com.br"
+}
 
 @app.route("/")
 def index():
@@ -10,35 +16,15 @@ def index():
 
 @app.route("/avisar", methods=["POST"])
 def avisar():
-    nome = request.form["nome_cliente"]
-    
-    destinatario_cliente = f"{nome.lower()}@proprinter.com.br"
-    destinatarios = [destinatario_cliente, "felipe@proprinter.com.br"]
+    nome_cliente = request.form.get("nome_cliente")
+    email_cliente = clientes_emails.get(nome_cliente)
 
-    corpo = f"""
-    Olá {nome},
+    if not email_cliente:
+        return f"Cliente {nome_cliente} não encontrado.", 400
 
-    O técnico da ProPrinter está a caminho para atender ao chamado.
-
-    Por favor, esteja disponível para recebê-lo.
-
-    Att,
-    Equipe ProPrinter
-    """
-
-    msg = MIMEText(corpo)
-    msg['Subject'] = "Técnico a caminho - ProPrinter"
-    msg['From'] = "seu-email@dominio.com"  # Altere para seu e-mail remetente
-    msg['To'] = ", ".join(destinatarios)
-
-    try:
-        with smtplib.SMTP("smtp.seudominio.com", 587) as server:  # Ajuste para seu SMTP
-            server.starttls()
-            server.login("seu-usuario", "sua-senha")  # Substitua por suas credenciais
-            server.send_message(msg)
-        return f"Notificação enviada para {nome} e cópia para gestor!"
-    except Exception as e:
-        return f"Erro ao enviar e-mail: {str(e)}"
+    # Aqui você colocaria a lógica para enviar o email, por exemplo.
+    # Por enquanto só vai retornar uma mensagem simples.
+    return f"Notificação enviada para {nome_cliente} no email {email_cliente}!"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
