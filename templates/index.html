@@ -4,12 +4,9 @@
     <meta charset="UTF-8" />
     <title>Notificar Cliente - ProPrinter</title>
     <style>
-        /* Fonte e reset básico */
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Montserrat', sans-serif;
@@ -85,7 +82,7 @@
             padding: 15px;
             border: none;
             border-radius: 8px;
-            background-color: #c70039; /* vermelho ProPrinter */
+            background-color: #c70039;
             color: white;
             font-weight: 700;
             font-size: 1.1rem;
@@ -97,7 +94,6 @@
             background-color: #9c002c;
         }
 
-        /* Esconder opções do select que não batem com o filtro */
         option[style*="display: none"] {
             display: none !important;
         }
@@ -106,7 +102,6 @@
 <body>
 
 <header>
-    <!-- Substitua o src abaixo pela URL do logo ProPrinter ou arquivo local -->
     <img src="https://proprinter.com.br/wp-content/uploads/2022/06/logo-proprinter-branco.png" alt="Logo ProPrinter" />
 </header>
 
@@ -122,6 +117,7 @@
             <option value="Gustavo">Gustavo</option>
             <option value="Suporte">Suporte</option>
             <option value="Impressora">Impressora</option>
+            <option value="Felipe">Felipe</option>
         </select><br>
         <button type="submit">Técnico a caminho</button>
     </form>
@@ -136,12 +132,8 @@
 
         for (let i = 0; i < options.length; i++) {
             const txt = options[i].textContent || options[i].innerText;
-            if (i === 0) continue; // pular "Selecione um cliente"
-            if (txt.toLowerCase().includes(filtro)) {
-                options[i].style.display = "";
-            } else {
-                options[i].style.display = "none";
-            }
+            if (i === 0) continue;
+            options[i].style.display = txt.toLowerCase().includes(filtro) ? "" : "none";
         }
     }
 </script>
