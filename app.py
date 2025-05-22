@@ -1,16 +1,15 @@
+from flask import Flask, render_template, request
 import os
 import smtplib
-from flask import Flask, render_template, request
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from email.message import EmailMessage
 
 app = Flask(__name__)
 
-# Dicionário para mapear nome do cliente para email
+# Mapeamento correto de nomes para e-mails
 clientes_emails = {
-    "Gustavo": "gustavo@proprinter.com.br",
+    "Gustavo": "g7761273@gmail.com",
     "Suporte": "suporte@proprinter.com.br",
-    "Impressora": "impressora@proprinter.com.br",
+    "Impressora": "impressoras@proprinter.com.br",
     "Felipe": "felipe@proprinter.com.br"
 }
 
@@ -26,27 +25,27 @@ def avisar():
     if not email_cliente:
         return f"Cliente {nome_cliente} não encontrado.", 400
 
-    # Conteúdo do e-mail
-    assunto = "Técnico a caminho"
-    corpo = f"Olá {nome_cliente}, o técnico da ProPrinter está a caminho para atendimento do seu chamado."
-
-    # Monta o e-mail
-    msg = MIMEMultipart()
-    msg["From"] = os.environ.get("EMAIL_USER")
-    msg["To"] = email_cliente
-    msg["Subject"] = assunto
-    msg.attach(MIMEText(corpo, "plain"))
-
+    # Enviar e-mail real
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as servidor:
-            servidor.starttls()
-            servidor.login(os.environ.get("EMAIL_USER"), os.environ.get("EMAIL_PASS"))
-            servidor.sendmail(msg["From"], msg["To"], msg.as_string())
-    except Exception as e:
-        return f"Erro ao enviar e-mail: {e}", 500
+        email_user = os.environ.get("EMAIL_USER")
+        email_pass = os.environ.get("EMAIL_PASS")
 
-    return f"Notificação enviada para {nome_cliente} no email {email_cliente}!"
+        if not email_user or not email_pass:
+            return "Credenciais de e-mail não configuradas.", 500
+
+        msg = EmailMessage()
+        msg["Subject"] = "Técnico a caminho - ProPrinter"
+        msg["From"] = email_user
+        msg["To"] = email_cliente
+        msg.set_content(f"Olá {nome_cliente},\n\nUm técnico da ProPrinter está a caminho do seu local.\n\nAtenciosamente,\nEquipe ProPrinter")
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(email_user, email_pass)
+            smtp.send_message(msg)
+
+        return f"Notificação enviada para {nome_cliente} no email {email_cliente}!"
+    except Exception as e:
+        return f"Erro ao enviar e-mail: {str(e)}", 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
