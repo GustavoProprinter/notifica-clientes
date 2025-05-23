@@ -1,151 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <title>Notificar Cliente - ProPrinter</title>
-    <style>
-        /* Fonte e reset básico */
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  <meta charset="UTF-8">
+  <title>Notificação de Técnico</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4 url('https://proprinter.com.br/logo-fundo.png') no-repeat center center fixed;
+      background-size: cover;
+      padding: 40px;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    .form-container {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #001d3d 0%, #003566 100%);
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 40px 20px;
-        }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
 
-        header {
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 40px;
-            text-align: center;
-        }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #444;
+    }
 
-        header img {
-            max-width: 200px;
-            height: auto;
-            margin-bottom: 10px;
-        }
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
 
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
-            width: 100%;
-            max-width: 500px;
-        }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-        h2 {
-            font-weight: 700;
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-        }
-
-        p {
-            font-weight: 400;
-            margin-bottom: 15px;
-            font-size: 1rem;
-            color: #dcdcdc;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            border: none;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        select {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: none;
-            font-size: 1rem;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
-
-        button {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            background-color: #c70039; /* vermelho ProPrinter */
-            color: white;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #9c002c;
-        }
-
-        /* Esconder opções do select que não batem com o filtro */
-        option[style*="display: none"] {
-            display: none !important;
-        }
-    </style>
+    button:hover {
+      background-color: #004a99;
+    }
+  </style>
 </head>
 <body>
+  <div class="form-container">
+    <h2>Notificar Cliente</h2>
+    <form action="/enviar" method="POST">
+      <!-- Endereço do cliente -->
+      <label for="endereco">Endereço do cliente:</label>
+      <input type="text" id="endereco" name="endereco" required>
 
-<header>
-    <!-- Agora a imagem vem da pasta static -->
-    <img src="{{ url_for('static', filename='proprinter.png') }}" alt="Logo ProPrinter" />
-</header>
+      <!-- Seleção do técnico -->
+      <label for="tecnico">Técnico responsável:</label>
+      <select id="tecnico" name="tecnico" required>
+        <option value="">Selecione o técnico</option>
+        <option value="Felipe">Felipe</option>
+        <option value="Roberto">Roberto</option>
+      </select>
 
-<div class="container">
-    <h2>Chamado #1234</h2>
-    <p>Selecione o cliente para notificar:</p>
-
-    <input type="text" id="filtro" placeholder="Buscar por nome..." onkeyup="filtrarClientes()">
-
-    <form action="/avisar" method="post">
-        <select name="nome_cliente" id="clienteSelect" required>
-            <option value="" disabled selected>Selecione um cliente</option>
-            <option value="Gustavo">Gustavo</option>
-            <option value="Suporte">Suporte</option>
-            <option value="Impressora">Impressora</option>
-            <option value="Felipe">Felipe</option>
-        </select><br>
-        <button type="submit">Técnico a caminho</button>
+      <button type="submit">Enviar notificação</button>
     </form>
-</div>
-
-<script>
-    function filtrarClientes() {
-        const input = document.getElementById("filtro");
-        const filtro = input.value.toLowerCase();
-        const select = document.getElementById("clienteSelect");
-        const options = select.getElementsByTagName("option");
-
-        for (let i = 0; i < options.length; i++) {
-            const txt = options[i].textContent || options[i].innerText;
-            if (i === 0) continue; // pular "Selecione um cliente"
-            if (txt.toLowerCase().includes(filtro)) {
-                options[i].style.display = "";
-            } else {
-                options[i].style.display = "none";
-            }
-        }
-    }
-</script>
-
+  </div>
 </body>
 </html>
