@@ -3,10 +3,11 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import json
 
 app = Flask(__name__)
 
-# Dados dos clientes e e-mails
+# Mapeamento dos clientes e e-mails
 clientes_emails = {
     "Gustavo": "suporte@proprinter.com.br",
     "Suporte": "suporte@proprinter.com.br",
@@ -14,8 +15,23 @@ clientes_emails = {
     "Felipe": "felipe@proprinter.com.br"
 }
 
-# Dicionário para armazenar a última localização por técnico
-ULTIMAS_LOCALIZACOES = {}
+# Caminho do arquivo para armazenar localização
+LOCALIZACAO_FILE = "ultima_localizacao.json"
+
+def salvar_localizacao(lat, lon):
+    with open(LOCALIZACAO_FILE, "w") as f:
+        json.dump({"latitude": lat, "longitude": lon}, f)
+
+def carregar_localizacao():
+    if not os.path.exists(LOCALIZACAO_FILE):
+        return None
+    with open(LOCALIZACAO_FILE, "r") as f:
+        data = json.load(f)
+        lat = data.get("latitude")
+        lon = data.get("longitude")
+        if lat is not None and lon is not None:
+            return f"https://www.google.com/maps?q={lat},{lon}"
+    return None
 
 @app.route("/")
 def index():
@@ -41,20 +57,20 @@ def avisar():
     msg['To'] = email_cliente
     msg['Subject'] = "Técnico a caminho - ProPrinter"
 
+    ultima_url = carregar_localizacao()
+    print(f"Enviando email com localização: {ultima_url}")
+
     body = f"""
 Olá {nome_cliente},
 
 O técnico {nome_tecnico} está a caminho.
-
 """
-    url_localizacao = ULTIMAS_LOCALIZACOES.get(nome_tecnico)
-    if url_localizacao:
-        body += f"Acompanhe a localização em tempo real: {url_localizacao}\n\n"
+    if ultima_url:
+        body += f"\nAcompanhe a localização em tempo real: {ultima_url}\n"
     else:
-        body += "A localização do técnico ainda não está disponível.\n\n"
+        body += "\nA localização do técnico ainda não está disponível.\n"
 
-    body += "Atenciosamente,\nProPrinter"
-
+    body += "\nAtenciosamente,\nProPrinter"
     msg.attach(MIMEText(body, 'plain'))
 
     try:
@@ -71,15 +87,16 @@ O técnico {nome_tecnico} está a caminho.
 @app.route("/localizacao", methods=["POST"])
 def receber_localizacao():
     data = request.json
-    nome_tecnico = data.get("nome_tecnico")
     lat = data.get("latitude")
     lon = data.get("longitude")
-    if not nome_tecnico or lat is None or lon is None:
+
+    print(f"Recebido latitude: {lat}, longitude: {lon}")
+
+    if lat is None or lon is None:
         return {"error": "Dados inválidos"}, 400
 
-    url = f"https://www.google.com/maps?q={lat},{lon}"
-    ULTIMAS_LOCALIZACOES[nome_tecnico] = url
-    print(f"Localização atualizada para {nome_tecnico}: {url}")
+    salvar_localizacao(lat, lon)
+    print("Localização salva com sucesso.")
     return {"status": "ok"}
 
 if __name__ == "__main__":
