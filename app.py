@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -13,9 +13,12 @@ clientes_emails = {
     "Felipe": "felipe@proprinter.com.br"
 }
 
+# Variável para guardar a última localização do técnico
+localizacao_tecnico = {"latitude": None, "longitude": None}
+
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return "API ProPrinter rodando."
 
 @app.route("/avisar", methods=["POST"])
 def avisar():
@@ -31,11 +34,21 @@ def avisar():
     if not email_user or not email_pass:
         return "Configurações de email não encontradas.", 500
 
+    # Construir mensagem incluindo link para localização se disponível
+    lat = localizacao_tecnico.get("latitude")
+    lng = localizacao_tecnico.get("longitude")
+
     msg = MIMEMultipart()
     msg['From'] = email_user
     msg['To'] = email_cliente
     msg['Subject'] = "Técnico a caminho - ProPrinter"
-    body = f"O técnico está a caminho do cliente: {nome_cliente}."
+
+    if lat is not None and lng is not None:
+        mapa_link = f"https://www.google.com/maps?q={lat},{lng}"
+        body = f"O técnico está a caminho do cliente: {nome_cliente}.\nLocalização atual do técnico: {mapa_link}"
+    else:
+        body = f"O técnico está a caminho do cliente: {nome_cliente}.\nLocalização do técnico não disponível no momento."
+
     msg.attach(MIMEText(body, 'plain'))
 
     try:
@@ -49,13 +62,17 @@ def avisar():
 
     return f"Notificação enviada para {nome_cliente} no email {email_cliente}!"
 
-# Novo endpoint para receber localização do técnico
-@app.route("/localizacao", methods=["POST"])
-def receber_localizacao():
+@app.route("/atualizar_localizacao", methods=["POST"])
+def atualizar_localizacao():
     data = request.json
-    print(f"Localização recebida: {data}")
-    # Aqui você pode salvar no banco, arquivo, etc.
-    return jsonify({"status": "ok"}), 200
+    lat = data.get("latitude")
+    lng = data.get("longitude")
+    if lat is None or lng is None:
+        return jsonify({"error": "Faltando latitude ou longitude"}), 400
+    
+    localizacao_tecnico["latitude"] = lat
+    localizacao_tecnico["longitude"] = lng
+    return jsonify({"message": "Localização atualizada!"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
