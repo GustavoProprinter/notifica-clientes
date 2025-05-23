@@ -4,7 +4,82 @@
     <meta charset="UTF-8" />
     <title>Notificar Cliente - ProPrinter</title>
     <style>
-        /* seu CSS já conhecido */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0; padding: 0;
+            background: linear-gradient(135deg, #001d3d 0%, #003566 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 40px 20px;
+        }
+        header {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        header img {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 {
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        p {
+            font-weight: 400;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            color: #dcdcdc;
+            text-align: center;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+        }
+        select {
+            cursor: pointer;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #c70039;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #9c002c;
+        }
+        option[style*="display: none"] {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -19,7 +94,7 @@
 
     <input type="text" id="filtro" placeholder="Buscar por nome..." onkeyup="filtrarClientes()">
 
-    <form action="/avisar" method="post" onsubmit="return prepararEnvio()">
+    <form action="/avisar" method="post">
         <select name="nome_cliente" id="clienteSelect" required>
             <option value="" disabled selected>Selecione um cliente</option>
             <option value="Gustavo">Gustavo</option>
@@ -27,18 +102,6 @@
             <option value="Impressora">Impressora</option>
             <option value="Felipe">Felipe</option>
         </select><br>
-
-        <label for="nome_tecnico">Nome do Técnico:</label><br>
-        <select name="nome_tecnico" id="nome_tecnico" required>
-            <option value="" disabled selected>Selecione o técnico</option>
-            <option value="Gustavo">Gustavo</option>
-            <option value="Felipe">Felipe</option>
-        </select><br>
-
-        <!-- Campos escondidos para latitude e longitude -->
-        <input type="hidden" name="latitude" id="latitude" />
-        <input type="hidden" name="longitude" id="longitude" />
-
         <button type="submit">Técnico a caminho</button>
     </form>
 </div>
@@ -55,26 +118,6 @@ function filtrarClientes() {
         if (i === 0) continue; // pula o "Selecione um cliente"
         options[i].style.display = txt.toLowerCase().includes(filtro) ? "" : "none";
     }
-}
-
-function prepararEnvio() {
-    if (!navigator.geolocation) {
-        alert("Geolocalização não suportada pelo seu navegador.");
-        return false;
-    }
-
-    navigator.geolocation.getCurrentPosition(function(position) {
-        document.getElementById('latitude').value = position.coords.latitude;
-        document.getElementById('longitude').value = position.coords.longitude;
-
-        // Submete o form após pegar a localização
-        document.forms[0].submit();
-    }, function(error) {
-        alert("Erro ao obter localização: " + error.message);
-    });
-
-    // Impede o envio imediato para esperar a localização
-    return false;
 }
 </script>
 
