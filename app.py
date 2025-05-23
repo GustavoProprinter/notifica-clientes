@@ -23,11 +23,17 @@ def avisar():
     nome_tecnico = request.form.get("nome_tecnico")
     latitude = request.form.get("latitude")
     longitude = request.form.get("longitude")
-    
+
     email_cliente = clientes_emails.get(nome_cliente)
 
     if not email_cliente:
         return f"Cliente {nome_cliente} não encontrado.", 400
+
+    if not nome_tecnico:
+        return "Nome do técnico é obrigatório.", 400
+
+    if not latitude or not longitude:
+        return "Localização (latitude e longitude) são obrigatórias.", 400
 
     email_user = os.getenv("EMAIL_USER")
     email_pass = os.getenv("EMAIL_PASS")
@@ -41,17 +47,20 @@ def avisar():
     msg['Subject'] = "Técnico a caminho - ProPrinter"
 
     body = f"""
-    Olá {nome_cliente},
+Olá {nome_cliente},
 
-    O técnico {nome_tecnico} está a caminho do cliente.
+O técnico {nome_tecnico} está a caminho do cliente.
 
-    Localização atual (aproximada):
-    Latitude: {latitude}
-    Longitude: {longitude}
+Localização atual (aproximada):
+Latitude: {latitude}
+Longitude: {longitude}
 
-    Att,
-    Equipe ProPrinter
-    """
+Veja a localização no mapa:
+https://www.google.com/maps?q={latitude},{longitude}
+
+Att,
+Equipe ProPrinter
+"""
     msg.attach(MIMEText(body, 'plain'))
 
     try:
@@ -63,7 +72,7 @@ def avisar():
     except Exception as e:
         return f"Erro ao enviar email: {e}", 500
 
-    return f"Notificação enviada para {nome_cliente} no email {email_cliente}!"
+    return f"Notificação enviada para {nome_cliente} ({email_cliente}) com localização!"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

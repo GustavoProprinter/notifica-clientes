@@ -25,7 +25,7 @@
             text-align: center;
         }
         header img {
-            max-width: 180px;
+            max-width: 200px;
             height: auto;
             margin-bottom: 10px;
         }
@@ -41,14 +41,12 @@
             font-weight: 700;
             margin-bottom: 20px;
             font-size: 1.8rem;
-            text-align: center;
         }
         p {
             font-weight: 400;
             margin-bottom: 15px;
             font-size: 1rem;
             color: #dcdcdc;
-            text-align: center;
         }
         input[type="text"], select {
             width: 100%;
@@ -80,6 +78,12 @@
         option[style*="display: none"] {
             display: none !important;
         }
+        #localizacaoStatus {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #ffdddd;
+            min-height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -94,7 +98,7 @@
 
     <input type="text" id="filtro" placeholder="Buscar por nome..." onkeyup="filtrarClientes()">
 
-    <form action="/avisar" method="post" onsubmit="return adicionarLocalizacao()">
+    <form action="/avisar" method="post" onsubmit="return preencherLocalizacao()">
         <select name="nome_cliente" id="clienteSelect" required>
             <option value="" disabled selected>Selecione um cliente</option>
             <option value="Gustavo">Gustavo</option>
@@ -103,11 +107,13 @@
             <option value="Felipe">Felipe</option>
         </select><br>
 
-        <input type="text" name="nome_tecnico" placeholder="Nome do técnico" required><br>
+        <input type="text" name="nome_tecnico" id="nome_tecnico" placeholder="Nome do técnico" required>
 
-        <!-- Campos escondidos para enviar localização -->
+        <!-- Campos escondidos para latitude e longitude -->
         <input type="hidden" name="latitude" id="latitude">
         <input type="hidden" name="longitude" id="longitude">
+
+        <div id="localizacaoStatus">Obtendo localização...</div>
 
         <button type="submit">Técnico a caminho</button>
     </form>
@@ -127,19 +133,34 @@ function filtrarClientes() {
     }
 }
 
-function adicionarLocalizacao() {
-    if (!navigator.geolocation) {
-        alert('Geolocalização não suportada pelo navegador.');
-        return false; // cancela o submit
+function preencherLocalizacao() {
+    const status = document.getElementById('localizacaoStatus');
+    const latInput = document.getElementById('latitude');
+    const lonInput = document.getElementById('longitude');
+
+    if (!latInput.value || !lonInput.value) {
+        status.textContent = 'Por favor, aguarde enquanto a localização é obtida.';
+        return false; // impede o envio do formulário até localização ser preenchida
     }
-    navigator.geolocation.getCurrentPosition(function(position) {
-        document.getElementById('latitude').value = position.coords.latitude;
-        document.getElementById('longitude').value = position.coords.longitude;
-        document.forms[0].submit();
-    }, function(error) {
-        alert('Não foi possível obter localização: ' + error.message);
-    });
-    return false; // aguarda a posição antes de enviar o form
+
+    return true;
+}
+
+function sucesso(pos) {
+    const crd = pos.coords;
+    document.getElementById('latitude').value = crd.latitude.toFixed(6);
+    document.getElementById('longitude').value = crd.longitude.toFixed(6);
+    document.getElementById('localizacaoStatus').textContent = `Localização obtida: (${crd.latitude.toFixed(6)}, ${crd.longitude.toFixed(6)})`;
+}
+
+function erro(err) {
+    document.getElementById('localizacaoStatus').textContent = 'Erro ao obter localização: ' + err.message;
+}
+
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(sucesso, erro, { enableHighAccuracy: true });
+} else {
+    document.getElementById('localizacaoStatus').textContent = 'Geolocalização não suportada no seu navegador.';
 }
 </script>
 
