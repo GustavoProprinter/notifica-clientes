@@ -14,8 +14,8 @@ clientes_emails = {
     "Felipe": "felipe@proprinter.com.br"
 }
 
-# Última localização recebida (variável global simples)
-ULTIMA_LOCALIZACAO_URL = None
+# Dicionário para armazenar a última localização por técnico
+ULTIMAS_LOCALIZACOES = {}
 
 @app.route("/")
 def index():
@@ -42,13 +42,14 @@ def avisar():
     msg['Subject'] = "Técnico a caminho - ProPrinter"
 
     body = f"""
-    Olá {nome_cliente},
+Olá {nome_cliente},
 
-    O técnico {nome_tecnico} está a caminho.
+O técnico {nome_tecnico} está a caminho.
 
-    """
-    if ULTIMA_LOCALIZACAO_URL:
-        body += f"Acompanhe a localização em tempo real: {ULTIMA_LOCALIZACAO_URL}\n\n"
+"""
+    url_localizacao = ULTIMAS_LOCALIZACOES.get(nome_tecnico)
+    if url_localizacao:
+        body += f"Acompanhe a localização em tempo real: {url_localizacao}\n\n"
     else:
         body += "A localização do técnico ainda não está disponível.\n\n"
 
@@ -69,15 +70,16 @@ def avisar():
 
 @app.route("/localizacao", methods=["POST"])
 def receber_localizacao():
-    global ULTIMA_LOCALIZACAO_URL
     data = request.json
+    nome_tecnico = data.get("nome_tecnico")
     lat = data.get("latitude")
     lon = data.get("longitude")
-    if lat is None or lon is None:
+    if not nome_tecnico or lat is None or lon is None:
         return {"error": "Dados inválidos"}, 400
 
-    ULTIMA_LOCALIZACAO_URL = f"https://www.google.com/maps?q={lat},{lon}"
-    print(f"Localização atualizada: {ULTIMA_LOCALIZACAO_URL}")
+    url = f"https://www.google.com/maps?q={lat},{lon}"
+    ULTIMAS_LOCALIZACOES[nome_tecnico] = url
+    print(f"Localização atualizada para {nome_tecnico}: {url}")
     return {"status": "ok"}
 
 if __name__ == "__main__":

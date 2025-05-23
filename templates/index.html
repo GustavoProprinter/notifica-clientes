@@ -94,8 +94,15 @@
 
     <form action="/avisar" method="post">
         <label for="nome_tecnico" style="color:#ddd;">Nome do Técnico:</label>
-        <input type="text" name="nome_tecnico" id="nome_tecnico" placeholder="Digite seu nome" required>
+        <select name="nome_tecnico" id="nome_tecnico" required>
+            <option value="" disabled selected>Selecione o técnico</option>
+            <option value="Felipe">Felipe</option>
+            <option value="Gustavo">Gustavo</option>
+            <option value="Suporte">Suporte</option>
+            <!-- Adicione mais técnicos aqui se precisar -->
+        </select>
 
+        <label for="nome_cliente" style="color:#ddd;">Cliente:</label>
         <select name="nome_cliente" id="clienteSelect" required>
             <option value="" disabled selected>Selecione um cliente</option>
             <option value="Gustavo">Gustavo</option>
@@ -103,6 +110,7 @@
             <option value="Impressora">Impressora</option>
             <option value="Felipe">Felipe</option>
         </select><br>
+
         <button type="submit">Técnico a caminho</button>
     </form>
 </div>
