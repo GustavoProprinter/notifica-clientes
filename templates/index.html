@@ -1,76 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <title>Notificar Cliente - ProPrinter</title>
-    <style>
-        /* Seu CSS atual aqui (igual ao que você mandou) */
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ProPrinter - Notificação</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('/static/images/bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      text-align: center;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 40px;
+      margin: 5% auto;
+      border-radius: 20px;
+      max-width: 500px;
+    }
+
+    img.logo {
+      width: 180px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 30px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    select, button {
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #ccc;
+    }
+  </style>
 </head>
 <body>
-
-<header>
-    <img src="/static/proprinter.png" alt="Logo ProPrinter" />
-</header>
-
-<div class="container">
-    <h2>Chamado #1234</h2>
-    <p>Selecione o cliente para notificar:</p>
-
-    <input type="text" id="filtro" placeholder="Buscar por nome..." onkeyup="filtrarClientes()">
-
-    <form action="/avisar" method="post" onsubmit="preencherLocalizacao()">
-        <label for="tecnico">Técnico:</label>
-        <input type="text" id="tecnico" name="tecnico" required placeholder="Digite o nome do técnico" />
-
-        <select name="nome_cliente" id="clienteSelect" required>
-            <option value="" disabled selected>Selecione um cliente</option>
-            <option value="Gustavo">Gustavo</option>
-            <option value="Suporte">Suporte</option>
-            <option value="Impressora">Impressora</option>
-            <option value="Felipe">Felipe</option>
-        </select><br>
-
-        <!-- Campos ocultos para enviar latitude e longitude -->
-        <input type="hidden" name="latitude" id="latitude" />
-        <input type="hidden" name="longitude" id="longitude" />
-
-        <button type="submit">Técnico a caminho</button>
+  <div class="container">
+    <img src="/static/images/logo.png" alt="Logo ProPrinter" class="logo">
+    <h1>Notificar Cliente</h1>
+    <form method="POST" action="/avisar">
+      <select name="nome_cliente" required>
+        <option value="" disabled selected>Selecione o cliente</option>
+        <option value="Gustavo">Gustavo</option>
+        <option value="Suporte">Suporte</option>
+        <option value="Impressora">Impressora</option>
+        <option value="Felipe">Felipe</option>
+      </select>
+      <button type="submit">Avisar que o técnico está a caminho</button>
     </form>
-</div>
-
-<script>
-function filtrarClientes() {
-    const input = document.getElementById("filtro");
-    const filtro = input.value.toLowerCase();
-    const select = document.getElementById("clienteSelect");
-    const options = select.getElementsByTagName("option");
-
-    for (let i = 0; i < options.length; i++) {
-        const txt = options[i].textContent || options[i].innerText;
-        if (i === 0) continue; // pula o "Selecione um cliente"
-        options[i].style.display = txt.toLowerCase().includes(filtro) ? "" : "none";
-    }
-}
-
-function preencherLocalizacao() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            document.getElementById('latitude').value = position.coords.latitude;
-            document.getElementById('longitude').value = position.coords.longitude;
-            // Depois de preencher, o form será enviado automaticamente
-            document.forms[0].submit();
-        }, function(error) {
-            alert('Erro ao obter localização: ' + error.message);
-        });
-        // Previna o envio do form até localização ser preenchida
-        return false;
-    } else {
-        alert("Geolocalização não é suportada pelo seu navegador.");
-        return false;
-    }
-}
-</script>
-
+    <div class="footer">
+      Desenvolvido por ProPrinter &copy;
+    </div>
+  </div>
 </body>
 </html>
