@@ -6,18 +6,11 @@ from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
-# Clientes e emails
 clientes_emails = {
     "Gustavo": "suporte@proprinter.com.br",
     "Suporte": "suporte@proprinter.com.br",
     "Impressora": "impressoras@proprinter.com.br",
     "Felipe": "felipe@proprinter.com.br"
-}
-
-# Técnicos (exemplo, pode expandir)
-tecnicos = {
-    "Gustavo": "Gustavo",
-    "Felipe": "Felipe"
 }
 
 @app.route("/")
@@ -27,10 +20,11 @@ def index():
 @app.route("/avisar", methods=["POST"])
 def avisar():
     nome_cliente = request.form.get("nome_cliente")
-    email_cliente = clientes_emails.get(nome_cliente)
-    nome_tecnico = request.form.get("nome_tecnico", "Técnico")  # pode vir do form
+    nome_tecnico = request.form.get("nome_tecnico")
     latitude = request.form.get("latitude")
     longitude = request.form.get("longitude")
+    
+    email_cliente = clientes_emails.get(nome_cliente)
 
     if not email_cliente:
         return f"Cliente {nome_cliente} não encontrado.", 400
@@ -41,21 +35,23 @@ def avisar():
     if not email_user or not email_pass:
         return "Configurações de email não encontradas.", 500
 
-    # Corpo do email com localização e técnico
-    body = f"""
-    O técnico {nome_tecnico} está a caminho do cliente: {nome_cliente}.
-
-    Localização atual do técnico:
-    Latitude: {latitude}
-    Longitude: {longitude}
-
-    Link do mapa: https://www.google.com/maps/search/?api=1&query={latitude},{longitude}
-    """
-
     msg = MIMEMultipart()
     msg['From'] = email_user
     msg['To'] = email_cliente
     msg['Subject'] = "Técnico a caminho - ProPrinter"
+
+    body = f"""
+    Olá {nome_cliente},
+
+    O técnico {nome_tecnico} está a caminho do cliente.
+
+    Localização atual (aproximada):
+    Latitude: {latitude}
+    Longitude: {longitude}
+
+    Att,
+    Equipe ProPrinter
+    """
     msg.attach(MIMEText(body, 'plain'))
 
     try:

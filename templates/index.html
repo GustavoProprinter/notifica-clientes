@@ -94,7 +94,7 @@
 
     <input type="text" id="filtro" placeholder="Buscar por nome..." onkeyup="filtrarClientes()">
 
-    <form action="/avisar" method="post">
+    <form action="/avisar" method="post" onsubmit="return adicionarLocalizacao()">
         <select name="nome_cliente" id="clienteSelect" required>
             <option value="" disabled selected>Selecione um cliente</option>
             <option value="Gustavo">Gustavo</option>
@@ -102,6 +102,13 @@
             <option value="Impressora">Impressora</option>
             <option value="Felipe">Felipe</option>
         </select><br>
+
+        <input type="text" name="nome_tecnico" placeholder="Nome do técnico" required><br>
+
+        <!-- Campos escondidos para enviar localização -->
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+
         <button type="submit">Técnico a caminho</button>
     </form>
 </div>
@@ -118,6 +125,21 @@ function filtrarClientes() {
         if (i === 0) continue; // pula o "Selecione um cliente"
         options[i].style.display = txt.toLowerCase().includes(filtro) ? "" : "none";
     }
+}
+
+function adicionarLocalizacao() {
+    if (!navigator.geolocation) {
+        alert('Geolocalização não suportada pelo navegador.');
+        return false; // cancela o submit
+    }
+    navigator.geolocation.getCurrentPosition(function(position) {
+        document.getElementById('latitude').value = position.coords.latitude;
+        document.getElementById('longitude').value = position.coords.longitude;
+        document.forms[0].submit();
+    }, function(error) {
+        alert('Não foi possível obter localização: ' + error.message);
+    });
+    return false; // aguarda a posição antes de enviar o form
 }
 </script>
 
