@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -20,7 +20,6 @@ def index():
 @app.route("/avisar", methods=["POST"])
 def avisar():
     nome_cliente = request.form.get("nome_cliente")
-    nome_tecnico = request.form.get("nome_tecnico")
     email_cliente = clientes_emails.get(nome_cliente)
 
     if not email_cliente:
@@ -36,8 +35,7 @@ def avisar():
     msg['From'] = email_user
     msg['To'] = email_cliente
     msg['Subject'] = "Técnico a caminho - ProPrinter"
-
-    body = f"O técnico {nome_tecnico} está a caminho do cliente: {nome_cliente}."
+    body = f"O técnico está a caminho do cliente: {nome_cliente}."
     msg.attach(MIMEText(body, 'plain'))
 
     try:
@@ -50,6 +48,14 @@ def avisar():
         return f"Erro ao enviar email: {e}", 500
 
     return f"Notificação enviada para {nome_cliente} no email {email_cliente}!"
+
+# Novo endpoint para receber localização do técnico
+@app.route("/localizacao", methods=["POST"])
+def receber_localizacao():
+    data = request.json
+    print(f"Localização recebida: {data}")
+    # Aqui você pode salvar no banco, arquivo, etc.
+    return jsonify({"status": "ok"}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
